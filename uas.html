@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Login JSON (Compiler Friendly)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login JSON — Offline Ready</title>
 
 <style>
   body{
@@ -78,14 +78,16 @@
   <h2>Halo 👋</h2>
   <p><b>Nama:</b> <span id="namaUser"></span></p>
   <p><b>Status:</b> Login berhasil</p>
+
   <button style="background:#ef4444" onclick="logout()">Logout</button>
 </div>
 
 <script>
-  
+  // JSON DATASET (langsung di script — aman untuk file://)
   const USERS = [
-    { "username": "marcel",   "password": "12345" },
-    { "username": "aceng", "password": "123" },
+    { "username": "admin",   "password": "12345" },
+    { "username": "siswa01", "password": "abc123" },
+    { "username": "guru01",  "password": "pbo2025" }
   ];
 
   function showError(msg){
@@ -108,15 +110,18 @@
 
     if(!user || !pass){
       showError("Username dan password tidak boleh kosong.");
-      return;
+    return;
     }
 
-    // cek dari dataset JSON
+    // cek ke JSON
     const found = USERS.find(
       u => u.username === user && u.password === pass
     );
 
     if(found){
+      // simpan ke localStorage (agar terlihat di Application → Local storage)
+      localStorage.setItem("userLogin", JSON.stringify(found));
+
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("userPage").style.display = "block";
       document.getElementById("namaUser").textContent = user;
@@ -126,11 +131,23 @@
   }
 
   function logout(){
+    localStorage.removeItem("userLogin");
+
     document.getElementById("loginBox").style.display="block";
     document.getElementById("userPage").style.display="none";
+
     document.getElementById("username").value="";
     document.getElementById("password").value="";
     clearError();
+  }
+
+  // kalau sudah login sebelumnya, tampilkan ulang
+  const saved = localStorage.getItem("userLogin");
+  if(saved){
+    const u = JSON.parse(saved);
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("userPage").style.display="block";
+    document.getElementById("namaUser").textContent = u.username;
   }
 </script>
 
