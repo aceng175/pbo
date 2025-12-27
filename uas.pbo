@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Sederhana</title>
+  <title>Login Website</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      background: #eef2ff;
       padding: 30px;
     }
 
@@ -34,7 +34,7 @@
       padding: 10px;
       border: none;
       border-radius: 6px;
-      background: #2d78ff;
+      background: #2563eb;
       color: white;
       cursor: pointer;
       font-weight: bold;
@@ -72,13 +72,13 @@
   <div class="card" id="userPage">
     <h2>Selamat datang 👋</h2>
     <p><b>Nama:</b> <span id="namaUser"></span></p>
-    <p><b>Status:</b> User berhasil login</p>
+    <p><b>Status:</b> Anda berhasil login</p>
 
     <button onclick="logout()">Logout</button>
   </div>
 
   <script>
-    // --- DATA USER CONTOH (boleh diganti)
+    // Data login contoh — ganti sesuai kebutuhan
     const USERNAME_BENAR = "admin";
     const PASSWORD_BENAR = "12345";
 
