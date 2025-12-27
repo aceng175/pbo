@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Elegant Login - Local DB</title>
+<title>Elegant Login - Alert</title>
 
 <style>
   :root{
     --primary:#4f46e5;
-    --danger:#ef4444;
-    --bg:#f1f5f9;
   }
 
   *{box-sizing:border-box}
@@ -71,49 +69,13 @@
 
   #userPage{display:none}
 
-  /* -------- Popup -------- */
-  .popup-wrap{
-    position:fixed;
-    inset:0;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.45);
-    z-index:99;
-  }
-  .popup{
-    background:white;
-    padding:20px;
-    border-radius:16px;
-    width:100%;
-    max-width:320px;
-    text-align:center;
-    animation:fade .25s;
-  }
-  .popup h4{margin:0 0 8px}
-  .popup p{margin-top:0;color:#6b7280}
-  .popup button{
-    background:var(--danger);
-    margin-top:14px;
-  }
-
-  /* Responsive */
   @media(max-width:480px){
-    .card{padding:20px}
+    .card{padding:22px}
   }
 </style>
 </head>
 
 <body>
-
-<!-- POPUP -->
-<div class="popup-wrap" id="popupBox">
-  <div class="popup">
-    <h4 id="popupTitle">Oops</h4>
-    <p id="popupMsg">Pesan popup</p>
-    <button onclick="Popup.close()">Tutup</button>
-  </div>
-</div>
 
 <!-- LOGIN -->
 <div class="card" id="loginBox">
@@ -142,31 +104,16 @@
 
 <script>
 /* ===========================
-      POPUP CLASS
-=========================== */
-class PopupClass{
-  static open(title,msg){
-    document.getElementById("popupTitle").textContent = title;
-    document.getElementById("popupMsg").textContent = msg;
-    document.getElementById("popupBox").style.display = "flex";
-  }
-  static close(){
-    document.getElementById("popupBox").style.display = "none";
-  }
-}
-const Popup = PopupClass;
-
-/* ===========================
-    AUTH + "DATABASE"
+    AUTH + DATABASE LOCAL
 =========================== */
 class Auth{
   constructor(){
-    // create local DB if not exists
+    // buat database pertama kali
     if(!localStorage.getItem("usersDB")){
       localStorage.setItem("usersDB", JSON.stringify([
-        {username:"marcel", password:"12345"},
-        {username:"aceng", password:"123"},
-       
+        {username:"admin", password:"12345"},
+        {username:"siswa01", password:"abc123"},
+        {username:"guru01", password:"pbo2025"}
       ]));
     }
 
@@ -179,25 +126,28 @@ class Auth{
     const p = document.getElementById("password").value.trim();
 
     if(!u || !p){
-      Popup.open("Perhatian","Username & password wajib diisi.");
+      alert("Username dan password tidak boleh kosong!");
       return;
     }
 
     const found = this.users.find(x=>x.username===u && x.password===p);
 
     if(!found){
-      Popup.open("Login gagal","Username atau password salah.");
+      alert("Login gagal!\nUsername atau password salah.");
       return;
     }
 
     localStorage.setItem("userLogin", JSON.stringify(found));
+
     this.showUser(found.username);
+    alert("Login berhasil!");
   }
 
   logout(){
     localStorage.removeItem("userLogin");
-    document.getElementById("userPage").style.display="none";
     document.getElementById("loginBox").style.display="block";
+    document.getElementById("userPage").style.display="none";
+    alert("Anda sudah logout.");
   }
 
   autoLogin(){
