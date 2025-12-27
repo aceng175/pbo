@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login JSON</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login JSON (Compiler Friendly)</title>
 
 <style>
   body{
@@ -23,7 +23,7 @@
     border-radius:18px;
     box-shadow:0 25px 45px rgba(0,0,0,.15);
   }
-  .field{ margin:12px 0; position:relative; }
+  .field{ margin:12px 0; }
   input{
     width:100%;
     padding:10px 12px;
@@ -82,7 +82,7 @@
 </div>
 
 <script>
-  // JSON DATASET USER
+  
   const USERS = [
     { "username": "marcel",   "password": "12345" },
     { "username": "aceng", "password": "123" },
@@ -102,6 +102,7 @@
 
   function login(){
     clearError();
+
     const user = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value.trim();
 
@@ -110,14 +111,14 @@
       return;
     }
 
-    // cari user di JSON
-    const ditemukan = USERS.find(u => 
-      u.username === user && u.password === pass
+    // cek dari dataset JSON
+    const found = USERS.find(
+      u => u.username === user && u.password === pass
     );
 
-    if(ditemukan){
-      document.getElementById("loginBox").style.display="none";
-      document.getElementById("userPage").style.display="block";
+    if(found){
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("userPage").style.display = "block";
       document.getElementById("namaUser").textContent = user;
     } else {
       showError("Username atau password salah.");
