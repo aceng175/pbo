@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login JSON — Final</title>
+<title>Login + LocalStorage DB</title>
 
 <style>
   body{font-family:Poppins,Arial;background:#eef2ff;padding:30px}
@@ -35,22 +35,45 @@
 </div>
 
 <div class="card" id="userPage">
-  <h3>Selamat datang</h3>
+  <h3>Dashboard</h3>
+
   <p><b>Nama:</b> <span id="namaUser"></span></p>
+  <p><b>Status:</b> Login berhasil ✔️</p>
+
   <button style="background:#ef4444" onclick="logout()">Logout</button>
 </div>
 
 <script>
-const USERS = [
-  { "username": "admin", "password": "12345" },
-  { "username": "siswa01", "password": "abc123" },
-  { "username": "guru01", "password": "pbo2025" }
-];
+/*
+========================================
+1) BUAT “DATABASE” DI LOCALSTORAGE
+========================================
+*/
 
-function showError(m){
+if(!localStorage.getItem("usersDB")){
+  const defaultUsers = [
+    { username: "admin",   password: "12345" },
+    { username: "siswa01", password: "abc123" },
+    { username: "guru01",  password: "pbo2025" }
+  ];
+
+  localStorage.setItem("usersDB", JSON.stringify(defaultUsers));
+  console.log("Database dibuat:", defaultUsers);
+}
+
+// ambil database
+let USERS = JSON.parse(localStorage.getItem("usersDB"));
+
+/*
+========================================
+2) LOGIN + AUTO LOGIN
+========================================
+*/
+
+function showError(msg){
   const e=document.getElementById("errorMsg");
   e.style.display="block";
-  e.textContent=m;
+  e.textContent=msg;
 }
 
 function clearError(){
@@ -59,14 +82,12 @@ function clearError(){
 
 function login(){
   clearError();
-
   const u=document.getElementById("username").value.trim();
   const p=document.getElementById("password").value.trim();
 
   const found = USERS.find(x=>x.username===u && x.password===p);
 
   if(found){
-    // SIMPAN ke localStorage
     localStorage.setItem("userLogin", JSON.stringify(found));
 
     document.getElementById("loginBox").style.display="none";
@@ -79,8 +100,25 @@ function login(){
 
 function logout(){
   localStorage.removeItem("userLogin");
+
   document.getElementById("loginBox").style.display="block";
   document.getElementById("userPage").style.display="none";
+}
+
+/*
+========================================
+3) AUTO LOGIN TANPA INPUT
+========================================
+*/
+
+const saved = localStorage.getItem("userLogin");
+
+if(saved){
+  const u = JSON.parse(saved);
+
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("userPage").style.display="block";
+  document.getElementById("namaUser").textContent = u.username;
 }
 </script>
 
