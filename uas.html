@@ -13,6 +13,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  margin:0;
 }
 
 .card{
@@ -22,6 +23,8 @@ body{
   padding:26px;
   border-radius:16px;
   box-shadow:0 25px 45px rgba(0,0,0,.2);
+  position:relative;
+  z-index:10;
 }
 
 input{
@@ -49,109 +52,79 @@ button{
 
 <body>
 
-<!-- LOGIN -->
 <div class="card" id="loginBox">
   <h2>Masuk</h2>
   <input id="username" placeholder="Username">
   <input id="password" type="password" placeholder="Password">
-  <button onclick="auth.login()">Masuk</button>
+  <button id="btnLogin">Masuk</button>
 </div>
 
-<!-- DASHBOARD -->
 <div class="card" id="dashboard">
   <h2>Dashboard</h2>
   <p>Selamat datang, <b><span id="namaUser"></span></b></p>
-  <button style="background:#ef4444" onclick="auth.logout()">Logout</button>
+  <button id="btnLogout" style="background:#ef4444">Logout</button>
 </div>
 
 <script>
-/* =========================
-        DATABASE CLASS
-========================= */
+/* ================= DATABASE ================= */
 class Database{
   constructor(){
-    this.dbVersion = "v1";
-
-    if(localStorage.getItem("dbVersion") !== this.dbVersion){
-      const users = [
+    this.version = "v1";
+    if(localStorage.getItem("dbVersion") !== this.version){
+      localStorage.setItem("usersDB", JSON.stringify([
         {username:"marcel", password:"12345"},
-        {username:"aceng", password:"123"},
-      ];
-      localStorage.setItem("usersDB", JSON.stringify(users));
-      localStorage.setItem("dbVersion", this.dbVersion);
+        {username:"aceng", password:"123"}
+      ]));
+      localStorage.setItem("dbVersion", this.version);
       localStorage.removeItem("userLogin");
     }
   }
 
-  getUsers(){
-    return JSON.parse(localStorage.getItem("usersDB")) || [];
-  }
-
-  saveLogin(user){
-    localStorage.setItem("userLogin", JSON.stringify(user));
-  }
-
-  getLogin(){
-    return JSON.parse(localStorage.getItem("userLogin"));
-  }
-
-  clearLogin(){
-    localStorage.removeItem("userLogin");
-  }
+  getUsers(){ return JSON.parse(localStorage.getItem("usersDB")) || []; }
+  saveLogin(u){ localStorage.setItem("userLogin", JSON.stringify(u)); }
+  getLogin(){ return JSON.parse(localStorage.getItem("userLogin")); }
+  clearLogin(){ localStorage.removeItem("userLogin"); }
 }
 
-/* =========================
-            UI CLASS
-========================= */
+/* ================= UI ================= */
 class UI{
   static showLogin(){
-    loginBox.style.display = "block";
-    dashboard.style.display = "none";
+    document.querySelector("#loginBox").style.display="block";
+    document.querySelector("#dashboard").style.display="none";
   }
 
-  static showDashboard(username){
-    namaUser.textContent = username;
-    loginBox.style.display = "none";
-    dashboard.style.display = "block";
+  static showDashboard(name){
+    document.querySelector("#namaUser").textContent=name;
+    document.querySelector("#loginBox").style.display="none";
+    document.querySelector("#dashboard").style.display="block";
   }
 
-  static clearInput(){
-    username.value = "";
-    password.value = "";
+  static clear(){
+    document.querySelector("#username").value="";
+    document.querySelector("#password").value="";
   }
 }
 
-/* =========================
-          AUTH CLASS
-========================= */
+/* ================= AUTH ================= */
 class Auth{
   constructor(db){
-    this.db = db;
-    this.users = db.getUsers();
+    this.db=db;
+    this.users=db.getUsers();
     this.autoLogin();
   }
 
   login(){
-    const u = username.value.trim();
-    const p = password.value.trim();
+    const u=document.querySelector("#username").value.trim();
+    const p=document.querySelector("#password").value.trim();
 
-    if(!u || !p){
-      alert("Username dan password wajib diisi!");
-      return;
-    }
+    if(!u||!p) return alert("Username & password wajib diisi");
 
-    const user = this.users.find(
-      x => x.username === u && x.password === p
-    );
-
-    if(!user){
-      alert("Username atau password salah!");
-      return;
-    }
+    const user=this.users.find(x=>x.username===u&&x.password===p);
+    if(!user) return alert("Login gagal");
 
     this.db.saveLogin(user);
     UI.showDashboard(user.username);
-    UI.clearInput();
+    UI.clear();
   }
 
   logout(){
@@ -160,16 +133,17 @@ class Auth{
   }
 
   autoLogin(){
-    const user = this.db.getLogin();
-    if(user){
-      UI.showDashboard(user.username);
-    }
+    const u=this.db.getLogin();
+    if(u) UI.showDashboard(u.username);
   }
 }
 
-/* =========================
-        START APP
-========================= */
-const db = new Database();
-const auth = new Auth(db);
+/* ================= START ================= */
+const auth=new Auth(new Database());
+
+document.querySelector("#btnLogin").addEventListener("click",()=>auth.login());
+document.querySelector("#btnLogout").addEventListener("click",()=>auth.logout());
 </script>
+
+</body>
+</html>
