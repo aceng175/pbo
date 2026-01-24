@@ -72,7 +72,6 @@ class Database{
   constructor(){
     this.dbVersion = "v1";
 
-    // Reset data jika versi berbeda
     if(localStorage.getItem("dbVersion") !== this.dbVersion){
       const users = [
         {username:"marcel", password:"12345"},
@@ -85,7 +84,7 @@ class Database{
   }
 
   getUsers(){
-    return JSON.parse(localStorage.getItem("usersDB"));
+    return JSON.parse(localStorage.getItem("usersDB")) || [];
   }
 
   saveLogin(user){
@@ -106,19 +105,19 @@ class Database{
 ========================= */
 class UI{
   static showLogin(){
-    document.getElementById("loginBox").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
+    loginBox.style.display = "block";
+    dashboard.style.display = "none";
   }
 
   static showDashboard(username){
-    document.getElementById("namaUser").textContent = username;
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
+    namaUser.textContent = username;
+    loginBox.style.display = "none";
+    dashboard.style.display = "block";
   }
 
   static clearInput(){
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
+    username.value = "";
+    password.value = "";
   }
 }
 
@@ -133,8 +132,8 @@ class Auth{
   }
 
   login(){
-    const u = document.getElementById("username").value.trim();
-    const p = document.getElementById("password").value.trim();
+    const u = username.value.trim();
+    const p = password.value.trim();
 
     if(!u || !p){
       alert("Username dan password wajib diisi!");
@@ -146,4 +145,31 @@ class Auth{
     );
 
     if(!user){
-      alert("Username atau pa
+      alert("Username atau password salah!");
+      return;
+    }
+
+    this.db.saveLogin(user);
+    UI.showDashboard(user.username);
+    UI.clearInput();
+  }
+
+  logout(){
+    this.db.clearLogin();
+    UI.showLogin();
+  }
+
+  autoLogin(){
+    const user = this.db.getLogin();
+    if(user){
+      UI.showDashboard(user.username);
+    }
+  }
+}
+
+/* =========================
+        START APP
+========================= */
+const db = new Database();
+const auth = new Auth(db);
+</script>
