@@ -3,16 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login OOP — Local Storage</title>
+<title>UAS PBO - Login OOP</title>
 
 <style>
 body{
   font-family:Poppins,Arial;
-  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  background:
+    linear-gradient(
+      135deg,
+      #6b4f3f,   
+      #c9b59a    
+    );
   min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   margin:0;
 }
 
@@ -23,8 +28,6 @@ body{
   padding:26px;
   border-radius:16px;
   box-shadow:0 25px 45px rgba(0,0,0,.2);
-  position:relative;
-  z-index:10;
 }
 
 input{
@@ -40,11 +43,12 @@ button{
   padding:10px;
   border-radius:12px;
   border:none;
-  background:#4f46e5;
-  color:white;
   font-weight:600;
   cursor:pointer;
 }
+
+.btn-login{background:#2563eb;color:white}
+.btn-logout{background:#dc2626;color:white}
 
 #dashboard{display:none}
 </style>
@@ -52,97 +56,129 @@ button{
 
 <body>
 
+<!-- LOGIN PAGE -->
 <div class="card" id="loginBox">
-  <h2>Masuk</h2>
+  <h2>Login</h2>
   <input id="username" placeholder="Username">
   <input id="password" type="password" placeholder="Password">
-  <button id="btnLogin">Masuk</button>
+  <button class="btn-login" onclick="auth.login()">Login</button>
 </div>
 
+<!-- DASHBOARD -->
 <div class="card" id="dashboard">
-  <h2>Dashboard</h2>
-  <p>Selamat datang, <b><span id="namaUser"></span></b></p>
-  <button id="btnLogout" style="background:#ef4444">Logout</button>
+  <h2>Profil Pengguna</h2>
+  <p>Username: <b><span id="namaUser"></span></b></p>
+  <button class="btn-logout" onclick="auth.logout()">Logout</button>
 </div>
 
 <script>
-/* ================= DATABASE ================= */
+/* ===============================
+          DATABASE CLASS
+   (LocalStorage = File I/O)
+================================ */
 class Database{
   constructor(){
     this.version = "v1";
+
     if(localStorage.getItem("dbVersion") !== this.version){
-      localStorage.setItem("usersDB", JSON.stringify([
+      const users = [
         {username:"marcel", password:"12345"},
-        {username:"aceng", password:"123"}
-      ]));
+        {username:"aceng", password:"123"},
+        {username:"lamusu", password:"123"}
+      ];
+      localStorage.setItem("usersDB", JSON.stringify(users));
       localStorage.setItem("dbVersion", this.version);
-      localStorage.removeItem("userLogin");
+      localStorage.removeItem("loginSession");
     }
   }
 
-  getUsers(){ return JSON.parse(localStorage.getItem("usersDB")) || []; }
-  saveLogin(u){ localStorage.setItem("userLogin", JSON.stringify(u)); }
-  getLogin(){ return JSON.parse(localStorage.getItem("userLogin")); }
-  clearLogin(){ localStorage.removeItem("userLogin"); }
+  getUsers(){
+    return JSON.parse(localStorage.getItem("usersDB")) || [];
+  }
+
+  saveLogin(user){
+    localStorage.setItem("loginSession", JSON.stringify(user));
+  }
+
+  getLogin(){
+    return JSON.parse(localStorage.getItem("loginSession"));
+  }
+
+  clearLogin(){
+    localStorage.removeItem("loginSession");
+  }
 }
 
-/* ================= UI ================= */
+/* ===============================
+              UI CLASS
+================================ */
 class UI{
   static showLogin(){
-    document.querySelector("#loginBox").style.display="block";
-    document.querySelector("#dashboard").style.display="none";
+    document.getElementById("loginBox").style.display="block";
+    document.getElementById("dashboard").style.display="none";
   }
 
-  static showDashboard(name){
-    document.querySelector("#namaUser").textContent=name;
-    document.querySelector("#loginBox").style.display="none";
-    document.querySelector("#dashboard").style.display="block";
+  static showDashboard(username){
+    document.getElementById("namaUser").textContent=username;
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("dashboard").style.display="block";
   }
 
-  static clear(){
-    document.querySelector("#username").value="";
-    document.querySelector("#password").value="";
+  static clearInput(){
+    document.getElementById("username").value="";
+    document.getElementById("password").value="";
   }
 }
 
-/* ================= AUTH ================= */
+/* ===============================
+            AUTH CLASS
+================================ */
 class Auth{
-  constructor(db){
-    this.db=db;
-    this.users=db.getUsers();
+  constructor(database){
+    this.db = database;
     this.autoLogin();
   }
 
   login(){
-    const u=document.querySelector("#username").value.trim();
-    const p=document.querySelector("#password").value.trim();
+    const u = document.getElementById("username").value.trim();
+    const p = document.getElementById("password").value.trim();
 
-    if(!u||!p) return alert("Username & password wajib diisi");
+    if(!u || !p){
+      alert("Username dan password harus diisi!");
+      return;
+    }
 
-    const user=this.users.find(x=>x.username===u&&x.password===p);
-    if(!user) return alert("Login gagal");
+    const users = this.db.getUsers();
+    const user = users.find(x => x.username === u && x.password === p);
+
+    if(!user){
+      alert("Login gagal! Username atau password salah.");
+      return;
+    }
 
     this.db.saveLogin(user);
     UI.showDashboard(user.username);
-    UI.clear();
+    UI.clearInput();
   }
 
   logout(){
     this.db.clearLogin();
     UI.showLogin();
+    alert("Logout berhasil");
   }
 
   autoLogin(){
-    const u=this.db.getLogin();
-    if(u) UI.showDashboard(u.username);
+    const user = this.db.getLogin();
+    if(user){
+      UI.showDashboard(user.username);
+    }
   }
 }
 
-/* ================= START ================= */
-const auth=new Auth(new Database());
-
-document.querySelector("#btnLogin").addEventListener("click",()=>auth.login());
-document.querySelector("#btnLogout").addEventListener("click",()=>auth.logout());
+/* ===============================
+           START APP
+================================ */
+const auth = new Auth(new Database());
 </script>
 
 </body>
