@@ -1,46 +1,49 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Login OOP — Local DB</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login OOP — Local Storage</title>
 
 <style>
-  body{
-    font-family:Poppins,Arial;
-    background:linear-gradient(135deg,#4f46e5,#06b6d4);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-  }
-  .card{
-    width:100%;
-    max-width:450px;
-    background:white;
-    padding:26px;
-    border-radius:16px;
-    box-shadow:0 25px 45px rgba(0,0,0,.2);
-  }
-  input{
-    width:100%;
-    padding:10px;
-    border-radius:10px;
-    border:1px solid #d1d5db;
-    margin:10px 0;
-  }
-  button{
-    width:100%;
-    padding:10px;
-    border-radius:12px;
-    border:none;
-    color:white;
-    background:#4f46e5;
-    font-weight:600;
-    margin-top:6px;
-  }
-  #userPage{display:none}
+body{
+  font-family:Poppins,Arial;
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.card{
+  width:100%;
+  max-width:420px;
+  background:white;
+  padding:26px;
+  border-radius:16px;
+  box-shadow:0 25px 45px rgba(0,0,0,.2);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  background:#4f46e5;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+#dashboard{display:none}
 </style>
 </head>
 
@@ -55,23 +58,29 @@
 </div>
 
 <!-- DASHBOARD -->
-<div class="card" id="userPage">
+<div class="card" id="dashboard">
   <h2>Dashboard</h2>
-  <p><b>Nama:</b> <span id="namaUser"></span></p>
+  <p>Selamat datang, <b><span id="namaUser"></span></b></p>
   <button style="background:#ef4444" onclick="auth.logout()">Logout</button>
 </div>
 
 <script>
-/* ============================
-      DATABASE CLASS
-============================ */
+/* =========================
+        DATABASE CLASS
+========================= */
 class Database{
   constructor(){
-    if(!localStorage.getItem("usersDB")){
-      localStorage.setItem("usersDB", JSON.stringify([
+    this.dbVersion = "v1";
+
+    // Reset data jika versi berbeda
+    if(localStorage.getItem("dbVersion") !== this.dbVersion){
+      const users = [
         {username:"marcel", password:"12345"},
         {username:"aceng", password:"123"},
-      ]));
+      ];
+      localStorage.setItem("usersDB", JSON.stringify(users));
+      localStorage.setItem("dbVersion", this.dbVersion);
+      localStorage.removeItem("userLogin");
     }
   }
 
@@ -92,30 +101,30 @@ class Database{
   }
 }
 
-/* ============================
-          UI CLASS
-============================ */
+/* =========================
+            UI CLASS
+========================= */
 class UI{
   static showLogin(){
-    document.getElementById("loginBox").style.display="block";
-    document.getElementById("userPage").style.display="none";
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
   }
 
-  static showDashboard(name){
-    document.getElementById("namaUser").textContent = name;
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("userPage").style.display="block";
+  static showDashboard(username){
+    document.getElementById("namaUser").textContent = username;
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
   }
 
-  static clearFields(){
-    document.getElementById("username").value="";
-    document.getElementById("password").value="";
+  static clearInput(){
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
   }
 }
 
-/* ============================
+/* =========================
           AUTH CLASS
-============================ */
+========================= */
 class Auth{
   constructor(db){
     this.db = db;
@@ -128,43 +137,13 @@ class Auth{
     const p = document.getElementById("password").value.trim();
 
     if(!u || !p){
-      alert("Username & password harus diisi");
+      alert("Username dan password wajib diisi!");
       return;
     }
 
-    const found = this.users.find(x=>x.username===u && x.password===p);
+    const user = this.users.find(
+      x => x.username === u && x.password === p
+    );
 
-    if(!found){
-      alert("Username atau password salah!");
-      return;
-    }
-
-    this.db.saveLogin(found);
-    UI.showDashboard(found.username);
-    alert("Login berhasil!");
-  }
-
-  logout(){
-    this.db.clearLogin();
-    UI.clearFields();
-    UI.showLogin();
-    alert("Logout berhasil");
-  }
-
-  autoLogin(){
-    const saved = this.db.getLogin();
-    if(saved){
-      UI.showDashboard(saved.username);
-    }
-  }
-}
-
-/* ============================
-        START APP
-============================ */
-const db = new Database();
-const auth = new Auth(db);
-</script>
-
-</body>
-</html>
+    if(!user){
+      alert("Username atau pa
